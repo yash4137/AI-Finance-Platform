@@ -1,1 +1,3 @@
 # AI-Finance-Platform
+npm install @types/bcrypt@5.0.2 @types/cookie-parser@1.4.8 @types/cors@2.8.17 @types/dotenv@8.6.1 @types/express@5.0.1 @types/mongoose@5.11.96 @types/multer@1.4.12 @types/node@22.15.3 @types/node-cron@3.0.11 @types/passport@1.0.17 @types/passport-jwt@4.0.1 ts-node-dev@2.0.0 typescript@5.8.3
+npm install --save-dev @types/bcrypt@5.0.2 @types/cookie-parser@1.4.8 @types/cors@2.8.17 @types/dotenv@8.6.1 @types/express@5.0.1 @types/mongoose@5.11.96 @types/multer@1.4.12 @types/node@22.15.3 @types/node-cron@3.0.11 @types/passport@1.0.17 @types/passport-jwt@4.0.1 ts-node-dev@2.0.0 typescript@5.8.3
