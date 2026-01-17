@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
+
 import { Env } from "./config/env.config";
 import { HTTPSTATUS } from "./config/http.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
@@ -9,7 +10,7 @@ import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 import connectDatabase from "./config/database.config";
 
 const app = express();
-const BASE_PATH = Env.BASE_PATH;
+const BASE_PATH = Env.BASE_PATH || "/api";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -18,18 +19,28 @@ app.use(
     cors({
         origin: Env.FRONTEND_ORIGIN,
         credentials: true,
-    })
+    }),
 );
 
-app.get("/", asyncHandler (async (req: Request, res: Response, next: NextFunction) => {
-    throw new BadRequestException("Test error handling middleware");
-    res.status(HTTPSTATUS.OK).json({
-        message: "API is running",
-    });
-}));
 
-app.use(errorHandler)
+app.get("/", asyncHandler(async (req: Request, res: Response) => {
+        res.status(HTTPSTATUS.OK).json({
+            message: "API is running",
+            environment: Env.NODE_ENV,
+        });
+    }),
+);
 
+// Test error route (optional)
+app.get("/test-error", asyncHandler(async () => {
+        throw new BadRequestException("Test error handling middleware");
+    }),
+);
+
+// ---------------- Error Handler ----------------
+app.use(errorHandler);
+
+// ---------------- Server ----------------
 app.listen(Env.PORT, async () => {
     await connectDatabase();
     console.log(`Server is running on port ${Env.PORT} in ${Env.NODE_ENV} mode`);
