@@ -8,9 +8,10 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { BadRequestException } from "./utils/app-error";
 import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 import connectDatabase from "./config/database.config";
+import authRoutes from "./routes/auth.routes";
 
 const app = express();
-const BASE_PATH = Env.BASE_PATH || "/api";
+const BASE_PATH = Env.BASE_PATH;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -22,20 +23,21 @@ app.use(
     }),
 );
 
+// app.get("/", asyncHandler(async (req: Request, res: Response) => {
+//         res.status(HTTPSTATUS.OK).json({
+//             message: "API is running",
+//             environment: Env.NODE_ENV,
+//         });
+//     }),
+// );
 
-app.get("/", asyncHandler(async (req: Request, res: Response) => {
-        res.status(HTTPSTATUS.OK).json({
-            message: "API is running",
-            environment: Env.NODE_ENV,
-        });
-    }),
+app.get("/", asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+        throw new BadRequestException("This is a test error");
+    })
 );
 
-// Test error route (optional)
-app.get("/test-error", asyncHandler(async () => {
-        throw new BadRequestException("Test error handling middleware");
-    }),
-);
+
+app.use(`${BASE_PATH}/auth`, authRoutes);
 
 // ---------------- Error Handler ----------------
 app.use(errorHandler);
