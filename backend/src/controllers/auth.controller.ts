@@ -9,7 +9,10 @@ export const registerController = asyncHandler(
   async (req:Request, res:Response) => {
     const body = registerSchema.parse(req.body);
 
-    await registerService(body);
+    const result = await registerService(body);
 
-    return res.status(HTTPSTATUS.CREATED).json({ message: "User registered successfully" });
+    return res.status(HTTPSTATUS.CREATED).json({ 
+      message: "User registered successfully",
+      data: result,
+    });
   });

@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
-
 import { Env } from "./config/env.config";
 import { HTTPSTATUS } from "./config/http.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
@@ -23,13 +22,6 @@ app.use(
     }),
 );
 
-// app.get("/", asyncHandler(async (req: Request, res: Response) => {
-//         res.status(HTTPSTATUS.OK).json({
-//             message: "API is running",
-//             environment: Env.NODE_ENV,
-//         });
-//     }),
-// );
 
 app.get("/", asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
         throw new BadRequestException("This is a test error");
