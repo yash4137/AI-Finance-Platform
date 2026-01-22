@@ -50,7 +50,7 @@ export const loginService = async (body: loginSchemaType) => {
 
   if (!isPasswordValid) throw new UnauthorizedException("Invalid email/password");
 
-  const { token, expiresAt } = signJwtToken({ userId: user.id() });
+  const { token, expiresAt } = signJwtToken({ userId: user.id });
 
   const reportSetting = await ReportSettingModel.findOne({ userId: user.id },
     { _id:1, frequency: 1, isEnabled: 1}

@@ -4,8 +4,8 @@ import { Env } from "../config/env.config";
 type TimeUnit = "s" | "m" | "h" | "d" | "w" | "y";
 type TimeString = `${number}${TimeUnit}`;
 
-export type AccesssTokenPayload = {
-  userId: string;
+export type AccessTokenPayload = {
+    userId: string;
 };
 
 type SignOptsAndSecret = SignOptions & {
@@ -24,7 +24,7 @@ const accessTokenSignOptions: SignOptsAndSecret = {
 
 
 export const signJwtToken = (
-    payload: AccesssTokenPayload,
+    payload: AccessTokenPayload,
     options?: SignOptsAndSecret
 ) => {
     const isAcessToken = !options || options === accessTokenSignOptions;
