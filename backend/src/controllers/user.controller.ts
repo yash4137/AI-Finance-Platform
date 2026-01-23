@@ -6,7 +6,6 @@ import { HTTPSTATUS } from "../config/http.config";
 export const getCurrentUserController = asyncHandler(
   async (req:Request, res:Response) => {
     const userId = req.user?._id;
-
     const user = await findByIdUserService(userId);
 
     return res.status(HTTPSTATUS.OK).json({

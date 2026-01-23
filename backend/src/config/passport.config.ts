@@ -23,14 +23,13 @@ passport.use(
     try {
       if(!payload.userId){
         return done(null, false, { message: "Invalid token payload" });
-
+      } 
         const user = await findByIdUserService(payload.userId);
 
         if (!user) {
           return done(null, false);
         }
         return done(null, user);
-      }
     }catch (error) {
       return done(error, false);
     }
