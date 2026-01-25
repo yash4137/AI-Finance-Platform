@@ -4,6 +4,7 @@ export enum ReportStatusEnum {
   SENT = "SENT",
   PENDING = "PENDING",
   FAILED = "FAILED",
+  NO_ACTIVITY = "NO_ACTIVITY",
 }
 
 export interface ReportDocument extends Document {
@@ -15,28 +16,31 @@ export interface ReportDocument extends Document {
   updatedAt: Date;
 }
 
-const reportSchema = new mongoose.Schema<ReportDocument>({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "User",
+const reportSchema = new mongoose.Schema<ReportDocument>(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    period: {
+      type: String,
+      required: true,
+    },
+    sentDate: {
+      type: Date,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: Object.values(ReportStatusEnum),
+      default: ReportStatusEnum.PENDING,
+    },
   },
-  period: {
-    type: String,
-    required: true,
-  },
-  sentDate: {
-    type: Date,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: Object.values(ReportStatusEnum),
-    default: ReportStatusEnum.PENDING,
-    // required: true,
-  },
-}, { timestamps: true });
+  {
+    timestamps: true,
+  }
+);
 
 const ReportModel = mongoose.model<ReportDocument>("Report", reportSchema);
-
 export default ReportModel;

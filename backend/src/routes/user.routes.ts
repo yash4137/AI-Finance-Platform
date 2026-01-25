@@ -1,9 +1,17 @@
 import { Router } from "express";
-import { get } from "http";
-import { getCurrentUserController } from "../controllers/user.controller";
+import {
+  getCurrentUserController,
+  updateUserController,
+} from "../controllers/user.controller";
+import { upload } from "../config/cloudinary.config";
 
 const userRoutes = Router();
 
-userRoutes.get("/current-user",getCurrentUserController);
+userRoutes.get("/current-user", getCurrentUserController);
+userRoutes.put(
+  "/update",
+  upload.single("profilePicture"),
+  updateUserController
+);
 
 export default userRoutes;

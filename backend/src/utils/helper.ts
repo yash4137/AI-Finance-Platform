@@ -1,23 +1,20 @@
-import { addDays, addMonths, addYears, startOfMonth } from "date-fns";
+import { addDays, addMonths, addWeeks, addYears, startOfMonth } from "date-fns";
 import { RecurringIntervalEnum } from "../models/transaction.model";
 
-
-export function calculateNextReportDate(
-  lastSentDate?: Date
-): Date {
+export function calulateNextReportDate(lastSentDate?: Date): Date {
   const now = new Date();
   const lastSent = lastSentDate || now;
 
-  const nextDate = startOfMonth(addMonths(lastSent, 1 ));
+  const nextDate = startOfMonth(addMonths(lastSent, 1));
   nextDate.setHours(0, 0, 0, 0);
 
+  console.log(nextDate, "nextDate");
   return nextDate;
-
 }
 
-export function calculateNextOccurence(
+export function calculateNextOccurrence(
   date: Date,
-    recurringInterval: keyof typeof RecurringIntervalEnum
+  recurringInterval: keyof typeof RecurringIntervalEnum
 ) {
   const base = new Date(date);
   base.setHours(0, 0, 0, 0);
@@ -26,7 +23,7 @@ export function calculateNextOccurence(
     case RecurringIntervalEnum.DAILY:
       return addDays(base, 1);
     case RecurringIntervalEnum.WEEKLY:
-      return addDays(base, 1);
+      return addWeeks(base, 1);
     case RecurringIntervalEnum.MONTHLY:
       return addMonths(base, 1);
     case RecurringIntervalEnum.YEARLY:
@@ -34,4 +31,8 @@ export function calculateNextOccurence(
     default:
       return base;
   }
+}
+
+export function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
