@@ -5,6 +5,7 @@ import { calculateNextOccurrence } from "../utils/helper";
 import { CreateTransactionType, UpdateTransactionType } from "../validators/transaction.validator";
 import { genAI, genAIModel } from "../config/google-ai.config";
 import { receiptPrompt } from "../utils/prompt";
+import { createPartFromBase64, createUserContent } from "@google/genai";
 
 export const createTransactionService = async (body:
     CreateTransactionType, userId: string) => {
@@ -315,3 +316,5 @@ export const scanReceiptService = async (
         return { error: "Reciept scanning  service unavailable" };
     }
 };
+
+
