@@ -20,7 +20,7 @@ const formatZodError = (res: Response, error: z.ZodError) => {
 
 const handleMulterError = (error: MulterError) => {
     const messages = {
-        LIMIT_UNEXPECTED_FILE: "Invalid file field name. Please use 'file'",
+        LIMIT_UNEXPECTED_FILE: "Unexpected file field name. For receipt scan use 'receipt', for user update use 'profilePicture'.",
         LIMIT_FILE_SIZE: "File size exceeds the limit",
         LIMIT_FILE_COUNT: "Too many files uploaded",
         default: "File upload error",

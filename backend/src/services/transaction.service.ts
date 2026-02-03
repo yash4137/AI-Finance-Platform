@@ -1,29 +1,36 @@
 import axios from "axios";
-import TransactionModel, { TransactionTypeEnum } from "../models/transaction.model";
+import { createWorker } from "tesseract.js";
+import TransactionModel, {
+    TransactionTypeEnum,
+} from "../models/transaction.model";
 import { BadRequestException, NotFoundException } from "../utils/app-error";
 import { calculateNextOccurrence } from "../utils/helper";
-import { CreateTransactionType, UpdateTransactionType } from "../validators/transaction.validator";
+import {
+    CreateTransactionType,
+    UpdateTransactionType,
+} from "../validators/transaction.validator";
 import { genAI, genAIModel } from "../config/google-ai.config";
+import { createUserContent } from "@google/genai";
 import { receiptPrompt } from "../utils/prompt";
+import { parseReceiptFromOCR } from "../utils/ocr-parser";
 
-export const createTransactionService = async (body:
-    CreateTransactionType, userId: string) => {
+export const createTransactionService = async (
+    body: CreateTransactionType,
+    userId: string
+) => {
     let nextRecurringDate: Date | undefined;
     const currentDate = new Date();
 
     if (body.isRecurring && body.recurringInterval) {
-        const calculatedDate = calculateNextOccurrence(
+        const calulatedDate = calculateNextOccurrence(
             body.date,
             body.recurringInterval
         );
 
         nextRecurringDate =
-            calculatedDate < currentDate
-                ? calculateNextOccurrence(
-                    currentDate,
-                    body.recurringInterval
-                )
-                : calculatedDate;
+            calulatedDate < currentDate
+                ? calculateNextOccurrence(currentDate, body.recurringInterval)
+                : calulatedDate;
     }
 
     const transaction = await TransactionModel.create({
@@ -36,6 +43,7 @@ export const createTransactionService = async (body:
         nextRecurringDate,
         lastProcessed: null,
     });
+
     return transaction;
 };
 
@@ -260,58 +268,116 @@ export const scanReceiptService = async (
 ) => {
     if (!file) throw new BadRequestException("No file uploaded");
 
+    let worker;
     try {
         if (!file.path) throw new BadRequestException("failed to upload file");
 
-        console.log(file.path);
+        console.log("Processing receipt:", file.path);
 
+        // Download the image from Cloudinary
         const responseData = await axios.get(file.path, {
             responseType: "arraybuffer",
         });
-        const base64String = Buffer.from(responseData.data).toString("base64");
+        const imageBuffer = Buffer.from(responseData.data);
 
-        if (!base64String) throw new BadRequestException("Could not process file");
+        // Initialize Tesseract OCR worker
+        worker = await createWorker("eng");
 
-        const result = await genAI.models.generateContent({
-            model: genAIModel,
-            contents: [
-                createUserContent([
-                    receiptPrompt,
-                    createPartFromBase64(base64String, file.mimetype),
-                ]),
-            ],
-            config: {
-                temperature: 0,
-                topP: 1,
-                responseMimeType: "application/json",
-            },
-        });
+        // Extract text from image using OCR
+        const { data: { text } } = await worker.recognize(imageBuffer);
 
-        const response = result.text;
-        const cleanedText = response?.replace(/```(?:json)?\n?/g, "").trim();
+        console.log("Extracted OCR text:", text);
 
-        if (!cleanedText)
+        if (!text || text.trim().length === 0) {
+            await worker.terminate();
             return {
-                error: "Could not read receipt content",
+                error: "Could not extract text from image",
             };
-
-        const data = JSON.parse(cleanedText);
-
-        if (!data.amount || !data.date) {
-            return { error: "Reciept missing required information" };
         }
 
-        return {
-            title: data.title || "Receipt",
-            amount: data.amount,
-            date: data.date,
-            description: data.description,
-            category: data.category,
-            paymentMethod: data.paymentMethod,
-            type: data.type,
-            receiptUrl: file.path,
-        };
+        // Try using Google AI first for structured parsing
+        try {
+            const result = await genAI.models.generateContent({
+                model: genAIModel,
+                contents: [
+                    createUserContent([receiptPrompt(text)]),
+                ],
+                config: {
+                    temperature: 0,
+                    topP: 1,
+                    responseMimeType: "application/json",
+                },
+            });
+
+            await worker.terminate();
+
+            const response = result.text;
+            const cleanedText = response?.replace(/```(?:json)?\n?/g, "").trim();
+
+            if (!cleanedText) {
+                // Fallback to manual parsing
+                console.log("AI returned empty response, using fallback parser");
+                const parsedData = parseReceiptFromOCR(text);
+
+                if (!parsedData) {
+                    return { error: "Could not extract receipt information" };
+                }
+
+                return {
+                    ...parsedData,
+                    receiptUrl: file.path,
+                };
+            }
+
+            const data = JSON.parse(cleanedText);
+
+            if (!data.amount || !data.date) {
+                // Fallback to manual parsing
+                console.log("AI missing required fields, using fallback parser");
+                const parsedData = parseReceiptFromOCR(text);
+
+                if (!parsedData) {
+                    return { error: "Receipt missing required information" };
+                }
+
+                return {
+                    ...parsedData,
+                    receiptUrl: file.path,
+                };
+            }
+
+            return {
+                title: data.title || "Receipt",
+                amount: data.amount,
+                date: data.date,
+                description: data.description,
+                category: data.category,
+                paymentMethod: data.paymentMethod,
+                type: data.type,
+                receiptUrl: file.path,
+            };
+        } catch (aiError: any) {
+            // If AI fails (quota exceeded, network error, etc.), use fallback parser
+            await worker.terminate();
+
+            console.log("AI service unavailable, using fallback OCR parser:", aiError.message);
+
+            const parsedData = parseReceiptFromOCR(text);
+
+            if (!parsedData) {
+                return {
+                    error: "Could not parse receipt. AI service temporarily unavailable."
+                };
+            }
+
+            return {
+                ...parsedData,
+                receiptUrl: file.path,
+            };
+        }
     } catch (error) {
-        return { error: "Reciept scanning  service unavailable" };
+        if (worker) await worker.terminate();
+        console.error("Receipt scanning error:", error);
+        return { error: "Receipt scanning service unavailable" };
     }
 };

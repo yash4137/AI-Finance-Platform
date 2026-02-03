@@ -7,16 +7,16 @@ import { Env } from "./config/env.config";
 import { HTTPSTATUS } from "./config/http.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { BadRequestException } from "./utils/app-error";
+import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 import connctDatabase from "./config/database.config";
+import authRoutes from "./routes/auth.route";
 import { passportAuthenticateJwt } from "./config/passport.config";
+import userRoutes from "./routes/user.route";
 import transactionRoutes from "./routes/transaction.route";
+import { initializeCrons } from "./crons";
 import reportRoutes from "./routes/report.route";
 import { getDateRange } from "./utils/date";
 import analyticsRoutes from "./routes/analytics.route";
-import { asyncHandler } from "./middlewares/asyncHandler.middleware";
-import authRoutes from "./routes/auth.routes";
-import userRoutes from "./routes/user.routes";
-import { initializeCrons } from "./crons";
 
 const app = express();
 const BASE_PATH = Env.BASE_PATH;
@@ -37,9 +37,7 @@ app.get(
     "/",
     asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
         throw new BadRequestException("This is a test error");
-        res.status(HTTPSTATUS.OK).json({
-            message: "Hello Subcribe to the channel",
-        });
+        res.status(HTTPSTATUS.OK).json({ message: "API is running" });
     })
 );
 
