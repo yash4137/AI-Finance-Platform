@@ -7,6 +7,8 @@ import {
 } from "../services/report.service";
 import { updateReportSettingSchema } from "../validators/report.validator";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
+import { getDateRange } from "../utils/date";
+import { DateRangePreset } from "../enums/date-range.enum";
 
 export const getAllReportsController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -42,11 +44,18 @@ export const updateReportSettingController = asyncHandler(
 export const generateReportController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?._id;
-    const { from, to } = req.query;
-    const fromDate = new Date(from as string);
-    const toDate = new Date(to as string);
+    const { dateRange, from, to } = req.query;    
+    const { from: fromDate, to: toDate } = getDateRange(
+      dateRange as DateRangePreset,
+      from ? new Date(from as string) : undefined,
+      to ? new Date(to as string) : undefined
+    );
 
-    const result = await generateReportService(userId, fromDate, toDate);
+    const result = await generateReportService(
+      userId, 
+      fromDate || new Date(0), 
+      toDate || new Date()      
+    );
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Report generated successfully",
