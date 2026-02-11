@@ -6,6 +6,7 @@ import { generateReportService } from "../../services/report.service";
 import ReportModel, { ReportStatusEnum } from "../../models/report.model";
 import { calulateNextReportDate } from "../../utils/helper";
 import { sendReportEmail } from "../../mailers/report.mailer";
+import TransactionModel from "../../models/transaction.model";
 
 export const processReportJob = async () => {
   const now = new Date();
@@ -14,14 +15,84 @@ export const processReportJob = async () => {
   let failedCount = 0;
 
   //Today july 1, then run report for -> june 1 - 30 
-//Get Last Month because this will run on the first of the month
+  //Get Last Month because this will run on the first of the month
   const from = startOfMonth(subMonths(now, 1));
   const to = endOfMonth(subMonths(now, 1));
 
   // const from = "2025-04-01T23:00:00.000Z";
   // const to = "2025-04-T23:00:00.000Z";
 
+  /////////  add for remember to remove this log after debugging //////////
   try {
+    // ===== DEBUG LOGGING START =====
+    console.log("=".repeat(60));
+    console.log("🔍 DEBUG: Report Job Started");
+    console.log("⏰ Current time (now):", now.toISOString());
+    console.log("📅 Report date range:");
+    console.log("   From:", from.toISOString());
+    console.log("   To:", to.toISOString());
+
+    // Check all report settings in database
+    const allSettings = await ReportSettingModel.find({}).populate("userId");
+    console.log("\n📊 Total report settings in DB:", allSettings.length);
+
+    if (allSettings.length === 0) {
+      console.log("❌ NO REPORT SETTINGS FOUND IN DATABASE!");
+      console.log("💡 Solution: Create report settings via API:");
+      console.log("   PUT /api/report/update-setting");
+      console.log("   Body: { \"isEnabled\": true }");
+    } else {
+      allSettings.forEach((setting, index) => {
+        console.log(`\n📋 Setting #${index + 1}:`);
+        console.log("   User ID:", setting.userId?._id || "NULL");
+        console.log("   User Email:", (setting.userId as any)?.email || "NULL");
+        console.log("   isEnabled:", setting.isEnabled);
+        console.log("   nextReportDate:", setting.nextReportDate?.toISOString() || "NULL");
+        console.log("   lastSentDate:", setting.lastSentDate?.toISOString() || "NULL");
+
+        // Check if this setting matches the query
+        const matches = setting.isEnabled &&
+          setting.nextReportDate &&
+          setting.nextReportDate <= now;
+        console.log("   ✅ Matches query:", matches);
+
+        if (!matches) {
+          if (!setting.isEnabled) {
+            console.log("   ⚠️  Reason: isEnabled is FALSE");
+          }
+          if (!setting.nextReportDate) {
+            console.log("   ⚠️  Reason: nextReportDate is NULL");
+          }
+          if (setting.nextReportDate && setting.nextReportDate > now) {
+            console.log("   ⚠️  Reason: nextReportDate is in FUTURE");
+          }
+        }
+      });
+    }
+
+    // Check for matching settings
+    const matchingSettings = await ReportSettingModel.find({
+      isEnabled: true,
+      nextReportDate: { $lte: now },
+    });
+    console.log("\n🎯 Settings matching query:", matchingSettings.length);
+
+    // Check transactions in date range
+    const transactionCount = await TransactionModel.countDocuments({
+      date: { $gte: from, $lte: to },
+    });
+    console.log("📦 Transactions in date range:", transactionCount);
+
+    if (transactionCount === 0) {
+      console.log("⚠️  NO TRANSACTIONS in", from.toISOString(), "to", to.toISOString());
+      console.log("💡 Solution: Create transactions for January 2026 via API");
+    }
+
+    console.log("=".repeat(60));
+    // ===== DEBUG LOGGING END =====
+    /// / // / /
+
+
     const reportSettingCursor = ReportSettingModel.find({
       isEnabled: true,
       nextReportDate: { $lte: now },
@@ -48,6 +119,7 @@ export const processReportJob = async () => {
         let emailSent = false;
         if (report) {
           try {
+            console.log(`📧 Sending email to ${user.email}...`);
             await sendReportEmail({
               email: user.email!,
               username: user.name!,
@@ -63,9 +135,12 @@ export const processReportJob = async () => {
               frequency: setting.frequency!,
             });
             emailSent = true;
+            console.log(`✅ Email sent successfully to ${user.email}`);
           } catch (error) {
-            console.log(`Email failed for ${user.id}`);
+            console.log(`❌ Email failed for ${user.id}:`, error);
           }
+        } else {
+          console.log(`⚠️  No report data for user ${user.email} - skipping email`);
         }
 
         await session.withTransaction(
