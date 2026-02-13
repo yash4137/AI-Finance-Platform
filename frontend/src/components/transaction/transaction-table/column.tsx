@@ -4,13 +4,13 @@ import {
   CircleDot,
   Copy,
   Loader,
-  LucideIcon,
   MoreHorizontal,
   Pencil,
   RefreshCw,
   //StopCircleIcon,
   Trash2,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,11 +20,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatCurrency } from "@/lib/format-currency";
 import useEditTransactionDrawer from "@/hooks/use-edit-transaction-drawer";
-import { TransactionType } from "@/features/transaction/transationType";
+import type { TransactionType } from "@/features/transaction/transationType";
 import { _TRANSACTION_FREQUENCY, _TRANSACTION_TYPE } from "@/constant";
 import {
   useDeleteTransactionMutation,

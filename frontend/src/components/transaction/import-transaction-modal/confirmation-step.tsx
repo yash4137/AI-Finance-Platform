@@ -11,7 +11,7 @@ import {
 import { _TRANSACTION_TYPE, PAYMENT_METHODS_ENUM } from "@/constant";
 import { toast } from "sonner";
 import { MAX_IMPORT_LIMIT } from "@/constant";
-import { BulkTransactionType } from "@/features/transaction/transationType";
+import type { BulkTransactionType } from "@/features/transaction/transationType";
 import { useProgressLoader } from "@/hooks/use-progress-loader";
 import { useBulkImportTransactionMutation } from "@/features/transaction/transactionAPI";
 

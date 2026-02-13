@@ -40,7 +40,7 @@ import {
 import { Switch } from "../ui/switch";
 import CurrencyInputField from "../ui/currency-input";
 import { SingleSelector } from "../ui/single-select";
-import { AIScanReceiptData } from "@/features/transaction/transationType";
+import type { AIScanReceiptData } from "@/features/transaction/transationType";
 import {
   useCreateTransactionMutation,
   useGetSingleTransactionQuery,

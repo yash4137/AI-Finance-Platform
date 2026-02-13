@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import {
-  ColumnDef,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
   flexRender,
+} from "@tanstack/react-table";
+import type {
+  ColumnDef,
   SortingState,
   VisibilityState,
   ColumnFiltersState,

@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CsvColumn, TransactionField } from "@/@types/transaction.type";
+import type { CsvColumn, TransactionField } from "@/@types/transaction.type";
 import {
   Select,
   SelectContent,

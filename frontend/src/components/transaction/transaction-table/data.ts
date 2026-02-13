@@ -1,8 +1,8 @@
 import { addMonths } from "date-fns";
 import { _TRANSACTION_TYPE, _TRANSACTION_FREQUENCY, _TRANSACTION_STATUS } from "@/constant";
-import { TransactionType } from "@/features/transaction/transationType";
+import type { TransactionType } from "@/features/transaction/transationType";
 
-  
+
 export const TRANSACTION_DATA: TransactionType[] = [
   {
     _id: "txn_1",
