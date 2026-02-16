@@ -68,3 +68,68 @@ export const loginService = async (body: loginSchemaType) => {
     reportSetting,
   };
 };
+
+export const googleAuthService = async (profile: any) => {
+  const { id, emails, displayName, photos } = profile;
+  const email = emails[0].value;
+  const googleId = id;
+  const name = displayName;
+  const profilePicture = photos?.[0]?.value || null;
+
+  const session = await mongoose.startSession();
+
+  try {
+    let user = await UserModel.findOne({ googleId }).session(session);
+
+    if (!user) {
+      user = await UserModel.findOne({ email }).session(session);
+
+      if (user) {
+        // User exists with email but not googleId, update with googleId
+        user.googleId = googleId;
+        if (!user.profilePicture && profilePicture) {
+          user.profilePicture = profilePicture;
+        }
+        await user.save({ session });
+      } else {
+        // Create new user
+        await session.withTransaction(async () => {
+          user = new UserModel({
+            name,
+            email,
+            googleId,
+            profilePicture,
+          });
+          await user!.save({ session });
+
+          const reportSetting = new ReportSettingModel({
+            userId: user!._id,
+            frequency: ReportFrequencyEnum.MONTHLY,
+            isEnabled: true,
+            nextReportDate: calulateNextReportDate(),
+            lastSentDate: null,
+          });
+          await reportSetting.save({ session });
+        });
+      }
+    }
+
+    const { token, expiresAt } = signJwtToken({ userId: user!.id });
+
+    const reportSetting = await ReportSettingModel.findOne(
+      { userId: user!.id },
+      { _id: 1, frequency: 1, isEnabled: 1 }
+    ).lean();
+
+    return {
+      user: user!.omitPassword(),
+      accessToken: token,
+      expiresAt,
+      reportSetting,
+    };
+  } catch (error) {
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+};

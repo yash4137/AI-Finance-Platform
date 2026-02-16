@@ -4,7 +4,8 @@ import { compareValue, hashValue } from "../utils/bcrypt";
 export interface UserDocument extends Document {
   name: string;
   email: string;
-  password: string;
+  password?: string;
+  googleId?: string;
   profilePicture: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -33,7 +34,13 @@ const userSchema = new Schema<UserDocument>(
     password: {
       type: String,
       select: true,
-      required: true,
+      required: false,
+    },
+    googleId: {
+      type: String,
+      required: false,
+      unique: true,
+      sparse: true,
     },
   },
   {
@@ -57,6 +64,7 @@ userSchema.methods.omitPassword = function (): Omit<UserDocument, "password"> {
 };
 
 userSchema.methods.comparePassword = async function (password: string) {
+  if (!this.password) return false;
   return compareValue(password, this.password);
 };
 
