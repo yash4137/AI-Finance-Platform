@@ -49,23 +49,6 @@ const Billing = () => {
               <strong>Production-Ready Deployment</strong>
             </li>
           </ul>
-
-          <p className="text-base mb-2">
-            Your support helps us keep building free, high-quality projects for
-            the community.
-          </p>
-
-          <p className="text-base font-medium">
-            🔓 <span className="text-green-600">Get it here:</span>
-            <a
-              className="text-blue-500 underline ml-1"
-              href="https://tinyurl.com/extended-stripe-integration"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Click Here
-            </a>
-          </p>
           <br />
           <br />
         </div>
