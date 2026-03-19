@@ -110,7 +110,7 @@ const ExpensePieChart = (props) => {
           y={viewBox.cy}
           className="fill-foreground text-2xl font-bold"
         >
-                              ${totalSpent.toLocaleString()}
+                              ₹{totalSpent.toLocaleString()}
                             </tspan>
                             <tspan
           x={viewBox.cx}
