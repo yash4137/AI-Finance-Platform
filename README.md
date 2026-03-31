@@ -44,7 +44,7 @@ AI Finance Platform is a full-stack personal finance web app for tracking transa
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/yash4137/AI-Finance-Platform.git
 cd AI-Finance-Platform
 ```
 
