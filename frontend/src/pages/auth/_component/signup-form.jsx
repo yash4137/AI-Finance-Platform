@@ -16,6 +16,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { useRegisterMutation } from "@/features/auth/authAPI";
+import { API_URL } from "@/lib/api-url";
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -96,7 +97,7 @@ const SignUpForm = () => {
     variant="outline"
     className="w-full"
     onClick={() => {
-      window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+      window.location.href = `${API_URL}/auth/google`;
     }}
   >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4 mr-2">

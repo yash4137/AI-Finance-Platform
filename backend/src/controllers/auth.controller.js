@@ -28,7 +28,7 @@ exports.loginController = (0, asyncHandler_middleware_1.asyncHandler)(async (req
 exports.googleAuthCallbackController = (0, asyncHandler_middleware_1.asyncHandler)(async (req, res) => {
     const profile = req.user;
     if (!profile) {
-        return res.redirect(`${env_config_1.Env.FRONTEND_ORIGIN}/sign-in?error=authentication_failed`);
+        return res.redirect(`${env_config_1.Env.FRONTEND_ORIGIN}/?error=authentication_failed`);
     }
     const { user, accessToken, expiresAt, reportSetting } = await (0, auth_service_1.googleAuthService)(profile);
     // Redirect to frontend with token
