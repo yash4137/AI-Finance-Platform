@@ -31,7 +31,6 @@ app.use((0, cors_1.default)({
     credentials: true,
 }));
 app.get("/", (0, asyncHandler_middleware_1.asyncHandler)(async (req, res, next) => {
-    throw new app_error_1.BadRequestException("This is a test error");
     res.status(http_config_1.HTTPSTATUS.OK).json({ message: "API is running" });
 }));
 app.use(`${BASE_PATH}/auth`, auth_route_1.default);
