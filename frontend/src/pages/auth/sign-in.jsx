@@ -3,8 +3,22 @@ import Logo from "@/components/logo/logo";
 import dashboardImg from "../../assets/images/dashboard_.png";
 import dashboardImgDark from "../../assets/images/dashboard_dark.png";
 import { useTheme } from "@/context/theme-provider";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 const SignIn = () => {
   const { theme } = useTheme();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "authentication_failed") {
+      toast.error("Google sign in failed. Please try again.");
+      navigate("/", { replace: true });
+    }
+  }, [searchParams, navigate]);
+
   return <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10 md:pt-6">
         <div className="flex justify-center gap-2 md:justify-start">
