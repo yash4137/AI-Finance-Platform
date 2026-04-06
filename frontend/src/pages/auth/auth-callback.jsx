@@ -5,6 +5,7 @@ import { setCredentials } from "@/features/auth/authSlice";
 import { toast } from "sonner";
 import { PROTECTED_ROUTES } from "@/routes/common/routePath";
 import { Loader } from "lucide-react";
+import { API_URL } from "@/lib/api-url";
 const AuthCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const AuthCallback = () => {
       return;
     }
     if (token && expiresAt) {
-      fetch(`${import.meta.env.VITE_API_URL}/user/current-user`, {
+      fetch(`${API_URL}/user/current-user`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

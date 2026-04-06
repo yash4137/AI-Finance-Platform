@@ -19,6 +19,7 @@ import { Loader } from "lucide-react";
 import { useLoginMutation } from "@/features/auth/authAPI";
 import { useAppDispatch } from "@/app/hook";
 import { setCredentials } from "@/features/auth/authSlice";
+import { API_URL } from "@/lib/api-url";
 const schema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters")
@@ -101,7 +102,7 @@ const SignInForm = ({
     variant="outline"
     className="w-full"
     onClick={() => {
-      window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+      window.location.href = `${API_URL}/auth/google`;
     }}
   >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4 mr-2">
